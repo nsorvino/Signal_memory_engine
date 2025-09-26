@@ -1,19 +1,23 @@
 # ============================================================================
 # api/routes/query.py  →  POST /query
 # ============================================================================
-import uuid, time, logging
-from fastapi import APIRouter, HTTPException, status
-import mlflow
+import logging
+import time
+import uuid
 
-from sensors.biometric import sample_all_signals
-from api.models import QueryRequest, QueryResponse, Chunk
+import mlflow
+from fastapi import APIRouter, HTTPException, status
+
 from api import deps
+from api.models import Chunk, QueryRequest, QueryResponse
+from coherence.commons import map_events_to_memory
+from sensors.biometric import sample_all_signals
 from utils.llm import invoke_chain
 from utils.tracing import trace_log
-from coherence.commons import map_events_to_memory
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
 
 @router.post("/query", response_model=QueryResponse)
 def query_endpoint(req: QueryRequest):
@@ -36,9 +40,9 @@ def query_endpoint(req: QueryRequest):
             signals = sample_all_signals()
         except Exception:
             signals = {"hrv": 0.0, "temperature": 0.0, "blink_rate": 0.0}
-        mlflow.log_metric("hrv",         signals.get("hrv", 0))
+        mlflow.log_metric("hrv", signals.get("hrv", 0))
         mlflow.log_metric("temperature", signals.get("temperature", 0))
-        mlflow.log_metric("blink_rate",  signals.get("blink_rate", 0))
+        mlflow.log_metric("blink_rate", signals.get("blink_rate", 0))
         if "gsr" in signals:
             mlflow.log_metric("gsr", signals["gsr"])
         if "emotion_label" in signals:
@@ -71,7 +75,9 @@ def query_endpoint(req: QueryRequest):
             raw_hits = deps.vectorstore.similarity_search_with_score(req.query, k=req.k)
         except Exception as e:
             logger.error("Vector retrieval error [%s]: %s", request_id, e)
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Vectorstore retrieval failed") from e
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY, detail="Vectorstore retrieval failed"
+            ) from e
         events = map_events_to_memory(raw_hits)
         top_score = max((e["score"] for e in events), default=0.0)
         flag = deps.flag_from_score(top_score)
@@ -79,10 +85,10 @@ def query_endpoint(req: QueryRequest):
         chunks = [Chunk(content=e["content"], score=e["score"]) for e in events]
 
         # log outputs (same as before)
-        mlflow.log_metric("top_score",   top_score)
-        mlflow.log_metric("num_chunks",  len(raw_hits))
-        mlflow.log_param("flag",         flag)
-        mlflow.log_param("suggestion",   suggestion)
+        mlflow.log_metric("top_score", top_score)
+        mlflow.log_metric("num_chunks", len(raw_hits))
+        mlflow.log_param("flag", flag)
+        mlflow.log_param("suggestion", suggestion)
         mlflow.log_text(answer, "answer.txt")
 
         emo_rec = int(any(e.get("emotional_recursion_present") for e in events))

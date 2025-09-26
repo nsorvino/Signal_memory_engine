@@ -1,23 +1,23 @@
 # ============================================================================
 # api/deps.py (shared singletons & config init)
 # ============================================================================
-import os
 import logging
-from dotenv import load_dotenv
-from pathlib import Path
+import os
 import re
+from pathlib import Path
 
 import mlflow
-
-from vector_store.pinecone_index import init_pinecone_index
-from vector_store.embeddings import get_embedder
-from scripts.langchain_retrieval import build_qa_chain
+from dotenv import load_dotenv
 
 # agents
 from agents.axis_agent import ROLE_AXIS, get_axis_chain
-from agents.oria_agent import ROLE_ORIA, get_oria_chain
 from agents.m_agent import ROLE_SENTINEL, get_sentinel_chain
-from coherence.commons import flag_from_score as _flag_from_score, SUGGESTIONS as _SUGGESTIONS
+from agents.oria_agent import ROLE_ORIA, get_oria_chain
+from coherence.commons import SUGGESTIONS as _SUGGESTIONS
+from coherence.commons import flag_from_score as _flag_from_score
+from scripts.langchain_retrieval import build_qa_chain
+from vector_store.embeddings import get_embedder
+from vector_store.pinecone_index import init_pinecone_index
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -35,6 +35,7 @@ if not (PINECONE_API_KEY and OPENAI_API_KEY):
 mlflow.autolog()
 try:
     import mlflow.openai
+
     mlflow.openai.autolog()
 except Exception:
     logger.warning("mlflow-openai plugin not installed; skipping OpenAI autolog.")
@@ -80,10 +81,12 @@ qa, vectorstore = build_qa_chain(
     k=3,
 )
 
+
 # shared helpers/consts used by routes
 def sanitize_key(key: str) -> str:
     # keep alnum, _, -, ., :, /, and space (like your original)
     return re.sub(r"[^\w\-\.:/ ]", "", str(key))
+
 
 SUGGESTIONS = _SUGGESTIONS
 

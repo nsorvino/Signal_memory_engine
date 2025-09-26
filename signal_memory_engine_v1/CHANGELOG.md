@@ -112,3 +112,49 @@ All notable changes introduced in **PR A — Core/API**.
 
 ### Notes
 - No README/docs changes included here; documentation will land in **PR D**.
+
+
+## 2025-09-23 - prC Tooling/Testing
+
+### Added
+- **CI**
+  - `.github/` at repo root with empty `CODEOWNERS` and `workflows/ci.yml`.
+- **Coverage**
+  - `.coveragerc` at repo root for consistent coverage reporting across jobs.
+- **Scripts**
+  - `scripts/probe_openai.py` to quickly verify OpenAI connectivity.
+- **Tests**
+  - `tests/test_coherence_commons.py`
+  - `tests/test_ingestion_batch_loader.py`
+  - `tests/test_ingestion_ingest_memory.py`
+  - `tests/test_smoke.py` (invokes the smoke script)
+  - `tests/test_storage_sqlite_store.py`
+  - `tests/conftest.py` with stubs/fixtures for external services.
+- **Logging**
+  - `utils/logging_setup.py` centralizes log formatting & level.
+- **Tooling**
+  - `.pre-commit-config.yaml` (ruff/black/mypy hooks).
+  - `Makefile` with shortcuts for `dev`, `lint`, `type`, `test`, `build`, `black`.
+  - `pyproject.toml` config for ruff / mypy / black.
+  - `pytest.ini` for test discovery & flags.
+  - `sitecustomize.py` to normalize import paths across local/CI/Docker.
+- **Testing utilities**
+  - `utils/pinecone_stub.py` — centralized, idempotent fake Pinecone client for offline/CI and local tests.  
+    Supports `PINECONE_INDEXES`, preserves legacy import path (`pinecone.db_data.index.Index`),  
+    and ensures `vector_store.pinecone_index.index` exists when modules import it directly.
+
+### Changed
+- **Smoke test**
+  - `scripts/smoke_test.py` now covers new routes (`/agents`, `/score`) and exposes `run_smoke()` to keep `__main__` minimal.
+- **Server bootstrap**
+  - `api/main.py` calls `setup_logging()` before FastAPI app initialization so app (and optionally Uvicorn) logs use the same structured format.
+- **Tests bootstrap**
+  - `tests/conftest.py` condensed to import/install the shared `pinecone_stub` instead of embedding a duplicate stub.  
+    Keeps prior behavior, reduces duplication, and sets default `PINECONE_INDEXES` (now includes `signal-engine`) for deterministic test runs.
+- **Import normalization**
+  - `sitecustomize.py` updated to install the Pinecone stub at process start when `SME_TEST_MODE=1` or `RUN_API_SMOKE=0`, preventing early imports from making network calls during tests/CI.
+- **Type-checking**
+  - Stub implementation made mypy-clean (removed unused `# type: ignore`, safer `setattr` usage).
+
+### Notes
+- No API behavior changes; additions are CI/test/dev-experience only.

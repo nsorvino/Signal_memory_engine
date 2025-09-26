@@ -1,7 +1,7 @@
 # vector_store/pinecone_index.py
 
-import os
 from pinecone import Pinecone, ServerlessSpec
+
 
 def init_pinecone_index(
     api_key: str,
@@ -26,7 +26,9 @@ def init_pinecone_index(
     if index_name in existing:
         desc = pc.describe_index(name=index_name)
         if desc.dimension != dimension:
-            print(f"Index '{index_name}' exists with dimension={desc.dimension}, expected={dimension}. Recreating.")
+            print(
+                f"Index '{index_name}' exists with dimension={desc.dimension}, expected={dimension}. Recreating."
+            )
             pc.delete_index(name=index_name)
             existing.remove(index_name)
 

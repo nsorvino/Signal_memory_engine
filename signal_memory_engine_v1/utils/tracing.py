@@ -1,9 +1,13 @@
 # utils/tracing.py
-import json, logging
+import json
+import logging
+from collections import deque
 from datetime import datetime
+from typing import Any
 
 TRACE_LOG_FILE = "trace.log"
 _log = logging.getLogger(__name__)
+
 
 def trace_log(agent: str, query: str, flag: str, score: float, request_id: str) -> None:
     try:
@@ -20,13 +24,10 @@ def trace_log(agent: str, query: str, flag: str, score: float, request_id: str) 
     except Exception as e:
         _log.error("trace_log write failed: %s", e)
 
-def read_trace_tail(limit: int = 20):
-    from collections import deque
-    try:
-        buf = deque(maxlen=limit)
-        with open(TRACE_LOG_FILE, "r") as f:
-            for line in f:
-                buf.append(json.loads(line))
-        return list(buf)
-    except FileNotFoundError:
-        return []
+
+def read_trace_tail(limit: int = 20) -> list[dict[str, Any]]:
+    buf: deque[dict[str, Any]] = deque(maxlen=limit)
+    with open(TRACE_LOG_FILE) as f:
+        for line in f:
+            buf.append(json.loads(line))
+    return list(buf)

@@ -1,6 +1,8 @@
 import json
+
 import pytest
-from agents.router_stub import route_agent, log_routing_decision
+
+from agents.router_stub import log_routing_decision, route_agent
 
 
 def test_axis_high_emotion():
@@ -8,7 +10,7 @@ def test_axis_high_emotion():
         "Why is my team so tense?",
         emotional_tone=0.9,
         signal_type="relational",
-        drift_score=0.0
+        drift_score=0.0,
     )
     assert decision["selected_agent"] == "Axis"
     assert "High emotional tone" in decision["reason"]
@@ -19,7 +21,7 @@ def test_m_compliance():
         "Is this legally allowed?",
         emotional_tone=0.3,
         signal_type="compliance",
-        drift_score=0.0
+        drift_score=0.0,
     )
     assert decision["selected_agent"] == "M"
     assert "Compliance signal" in decision["reason"]
@@ -31,7 +33,7 @@ def test_m_high_drift():
         "Data drift detected",
         emotional_tone=0.1,
         signal_type="relational",
-        drift_score=0.6
+        drift_score=0.6,
     )
     assert decision["selected_agent"] == "M"
     assert "High drift score" in decision["reason"]
@@ -39,22 +41,14 @@ def test_m_high_drift():
 
 @pytest.mark.parametrize("signal", ["relational", "biometric"])
 def test_oria_signal_types(signal):
-    decision = route_agent(
-        "Sample query",
-        emotional_tone=0.1,
-        signal_type=signal,
-        drift_score=0.0
-    )
+    decision = route_agent("Sample query", emotional_tone=0.1, signal_type=signal, drift_score=0.0)
     assert decision["selected_agent"] == "Oria"
     assert f"Signal type '{signal}'" in decision["reason"]
 
 
 def test_selah_fallback():
     decision = route_agent(
-        "Unknown signal",
-        emotional_tone=0.1,
-        signal_type="unknown",
-        drift_score=0.0
+        "Unknown signal", emotional_tone=0.1, signal_type="unknown", drift_score=0.0
     )
     assert decision["selected_agent"] == "Selah"
     assert "Fallback routing" in decision["reason"]
@@ -66,7 +60,7 @@ def test_invalid_tone_type():
         "Invalid tone type",
         emotional_tone="bad",
         signal_type="relational",
-        drift_score=0.0
+        drift_score=0.0,
     )
     assert decision["selected_agent"] == "Selah"
     assert "Invalid score input" in decision["reason"]
@@ -78,7 +72,7 @@ def test_tone_out_of_range():
         "Tone out of range",
         emotional_tone=-0.1,
         signal_type="relational",
-        drift_score=0.0
+        drift_score=0.0,
     )
     assert decision["selected_agent"] == "Selah"
     assert "Emotional tone out of range" in decision["reason"]
@@ -90,7 +84,7 @@ def test_drift_out_of_range():
         "Drift out of range",
         emotional_tone=0.1,
         signal_type="relational",
-        drift_score=1.5
+        drift_score=1.5,
     )
     assert decision["selected_agent"] == "Selah"
     assert "Drift score out of range" in decision["reason"]
@@ -99,10 +93,7 @@ def test_drift_out_of_range():
 def test_invalid_signal_type():
     # Non-string signal_type should fallback
     decision = route_agent(
-        "Invalid signal type",
-        emotional_tone=0.1,
-        signal_type=None,
-        drift_score=0.0
+        "Invalid signal type", emotional_tone=0.1, signal_type=None, drift_score=0.0
     )
     assert decision["selected_agent"] == "Selah"
     assert "Invalid signal type" in decision["reason"]

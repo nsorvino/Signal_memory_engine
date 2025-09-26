@@ -33,3 +33,7 @@ streamlit~=1.49
 # --- Dev/Test ---
 pytest~=8.4
 ruff~=0.13
+black~=24.10
+mypy~=1.11
+pre-commit~=3.8
+pip-tools~=7.4

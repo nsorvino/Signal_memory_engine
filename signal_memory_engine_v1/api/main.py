@@ -1,16 +1,21 @@
 # ============================================================================
 # api/main.py (slim bootstrap)
 # ============================================================================
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
 from api import deps
-from api.routes import signal as signal_routes
-from api.routes import query as query_routes
-from api.routes import multi as multi_routes
-from api.routes import memory as memory_routes
 from api.routes import agents as agents_routes
-from api.routes import score  as score_routes
-from api.routes import health  as health_routes
+from api.routes import health as health_routes
+from api.routes import memory as memory_routes
+from api.routes import multi as multi_routes
+from api.routes import query as query_routes
+from api.routes import score as score_routes
+from api.routes import signal as signal_routes
+from utils.logging_setup import setup_logging
+
+setup_logging()
 
 
 @asynccontextmanager

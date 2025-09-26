@@ -1,10 +1,12 @@
 # api/routes/health.py
 import os
+
 from fastapi import APIRouter
 
 router = APIRouter()
 
 REQUIRED_ENVS = ["OPENAI_API_KEY", "PINECONE_API_KEY"]
+
 
 @router.get("/health")
 def health():

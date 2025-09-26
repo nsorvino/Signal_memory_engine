@@ -1,0 +1,37 @@
+# .coveragerc
+[run]
+branch = True
+source =
+    signal_memory_engine_v1
+
+# omit files that aren't unit-test targets (CLIs, demos, streamlit, stubs)
+omit =
+    */tests/*
+    signal_memory_engine_v1/streamlit_app.py
+    signal_memory_engine_v1/cli/*
+    signal_memory_engine_v1/scripts/*
+    signal_memory_engine_v1/sensors/*
+    signal_memory_engine_v1/processing/*
+    signal_memory_engine_v1/core.py
+    signal_memory_engine_v1/dashboard.py
+    signal_memory_engine_v1/api/routes/multi.py
+    signal_memory_engine_v1/api/routes/query.py
+    signal_memory_engine_v1/api/routes/search.py
+    signal_memory_engine_v1/api/routes/signal.py
+    signal_memory_engine_v1/api/routes/health.py
+    signal_memory_engine_v1/utils/llm.py
+    signal_memory_engine_v1/utils/tracing.py
+    signal_memory_engine_v1/utils/dashboard.py
+    signal_memory_engine_v1/setup.py
+    signal_memory_engine_v1/sitecustomize.py 
+
+
+[report]
+show_missing = True
+fail_under = 80
+exclude_lines =
+    # don’t count defensive and “can’t hit in tests” lines
+    pragma: no cover
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    raise NotImplementedError

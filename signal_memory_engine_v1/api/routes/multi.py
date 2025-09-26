@@ -1,22 +1,26 @@
 # ============================================================================
 # api/routes/multi.py  →  POST /multi_query
 # ============================================================================
-import uuid, time, logging
-from typing import Dict, List
-from fastapi import APIRouter, BackgroundTasks, HTTPException, status
-import mlflow, httpx
+import logging
+import time
+import uuid
 
-from sensors.biometric import sample_all_signals
-from api.models import QueryRequest, MultiQueryResponse, AgentResponse, Chunk
+import httpx
+import mlflow
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+
 from api import deps
+from api.models import AgentResponse, Chunk, MultiQueryResponse, QueryRequest
+from coherence.commons import map_events_to_memory
+from sensors.biometric import sample_all_signals
 from utils.llm import invoke_chain
 from utils.tracing import trace_log
-from coherence.commons import map_events_to_memory
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-def notify_human_loop(query: str, agents: List[str]) -> None:
+
+def notify_human_loop(query: str, agents: list[str]) -> None:
     payload = {"query": query, "agents": agents}
     try:
         httpx.post(
@@ -30,6 +34,7 @@ def notify_human_loop(query: str, agents: List[str]) -> None:
         logger.error("Escalation HTTP error: %s", e)
     except Exception as e:
         logger.error("Escalation unexpected error: %s", e)
+
 
 @router.post("/multi_query", response_model=MultiQueryResponse)
 def multi_query(req: QueryRequest, bg: BackgroundTasks):
@@ -50,9 +55,9 @@ def multi_query(req: QueryRequest, bg: BackgroundTasks):
             signals = sample_all_signals()
         except Exception:
             signals = {"hrv": 0.0, "temperature": 0.0, "blink_rate": 0.0}
-        mlflow.log_metric("hrv",         signals.get("hrv", 0))
+        mlflow.log_metric("hrv", signals.get("hrv", 0))
         mlflow.log_metric("temperature", signals.get("temperature", 0))
-        mlflow.log_metric("blink_rate",  signals.get("blink_rate", 0))
+        mlflow.log_metric("blink_rate", signals.get("blink_rate", 0))
         if "gsr" in signals:
             mlflow.log_metric("gsr", signals["gsr"])
         if "emotion_label" in signals:
@@ -70,7 +75,7 @@ def multi_query(req: QueryRequest, bg: BackgroundTasks):
         mlflow.log_param("prompt", full_prompt)
         mlflow.log_text(full_prompt, "prompt.txt")
 
-        out: Dict[str, AgentResponse] = {}
+        out: dict[str, AgentResponse] = {}
         all_events = []
 
         # iterate configured agents (deps.AGENTS should be tuples: (role, qa_chain, store))
@@ -85,7 +90,10 @@ def multi_query(req: QueryRequest, bg: BackgroundTasks):
                     logger.warning("Agent %s quota hit [%s]: %s", role, request_id, he.detail)
                     out[role] = AgentResponse(
                         answer="(LLM temporarily unavailable: quota/rate limit)",
-                        chunks=[], flag="stable", suggestion="No action", trust_score=0.0
+                        chunks=[],
+                        flag="stable",
+                        suggestion="No action",
+                        trust_score=0.0,
                     )
                     trace_log(role, req.query, "stable", 0.0, request_id)
                     mlflow.log_param(f"{safe}_flag", "stable")
@@ -96,8 +104,11 @@ def multi_query(req: QueryRequest, bg: BackgroundTasks):
             except Exception as e:
                 logger.error("Agent %s failed [%s]: %s", role, request_id, e)
                 out[role] = AgentResponse(
-                    answer="(error)", chunks=[], flag="stable",
-                    suggestion="No action", trust_score=0.0
+                    answer="(error)",
+                    chunks=[],
+                    flag="stable",
+                    suggestion="No action",
+                    trust_score=0.0,
                 )
                 trace_log(role, req.query, "stable", 0.0, request_id)
                 mlflow.log_param(f"{safe}_flag", "stable")
@@ -127,23 +138,22 @@ def multi_query(req: QueryRequest, bg: BackgroundTasks):
             chunks = [Chunk(content=e["content"], score=e["score"]) for e in events]
 
             out[role] = AgentResponse(
-                answer=ans, chunks=chunks, flag=flag,
-                suggestion=suggestion, trust_score=top_score
+                answer=ans, chunks=chunks, flag=flag, suggestion=suggestion, trust_score=top_score
             )
             trace_log(role, req.query, flag, top_score, request_id)
 
             # per-agent logging like before
-            mlflow.log_param( f"{safe}_flag",        flag)
-            mlflow.log_param( f"{safe}_suggestion",  suggestion)
-            mlflow.log_metric(f"{safe}_top_score",   top_score)
-            mlflow.log_metric(f"{safe}_num_chunks",  len(raw_hits))
+            mlflow.log_param(f"{safe}_flag", flag)
+            mlflow.log_param(f"{safe}_suggestion", suggestion)
+            mlflow.log_metric(f"{safe}_top_score", top_score)
+            mlflow.log_metric(f"{safe}_num_chunks", len(raw_hits))
             mlflow.log_text(ans, f"{safe}_answer.txt")
 
         # cross-agent derived metrics (use all_events instead of an undefined 'events')
         emo_rec_multi = int(any(e.get("emotional_recursion_present") for e in all_events))
         reroute_multi = int(any(e.get("rerouting_triggered") for e in all_events))
         mlflow.log_param("emotional_recursion_detected", emo_rec_multi)
-        mlflow.log_param("rerouting_triggered",          reroute_multi)
+        mlflow.log_param("rerouting_triggered", reroute_multi)
 
         avg_conf = (sum(r.trust_score for r in out.values()) / (len(out) or 1)) if out else 0.0
         mlflow.log_metric("chad_confidence_score", avg_conf)
@@ -152,8 +162,12 @@ def multi_query(req: QueryRequest, bg: BackgroundTasks):
 
         elapsed_ms = (time.time() - start_ts) * 1000
         mlflow.log_metric("endpoint_latency_ms", elapsed_ms)
-        mlflow.log_param("coherence_drift_detected", int(any(r.flag != "stable" for r in out.values())))
-        mlflow.log_param("escalation_triggered",     int(any(r.flag == "concern" for r in out.values())))
+        mlflow.log_param(
+            "coherence_drift_detected", int(any(r.flag != "stable" for r in out.values()))
+        )
+        mlflow.log_param(
+            "escalation_triggered", int(any(r.flag == "concern" for r in out.values()))
+        )
 
     high_agents = [r for r, resp in out.items() if resp.flag == "concern"]
     if high_agents:

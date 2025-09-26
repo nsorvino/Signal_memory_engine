@@ -2,6 +2,7 @@
 # api/routes/memory.py  →  GET /memory_log
 # ============================================================================
 from fastapi import APIRouter, HTTPException
+
 from api.models import TraceRecord
 from utils.tracing import read_trace_tail
 

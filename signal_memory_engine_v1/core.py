@@ -1,8 +1,10 @@
 # core.py
 import os
-from dotenv import load_dotenv
-import pinecone
+from typing import cast
 
+import pinecone
+from dotenv import load_dotenv
+from langchain.chains import RetrievalQA
 from langchain_community.chat_models import ChatOpenAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Pinecone as LC_Pinecone
@@ -11,6 +13,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
+
 
 def build_qa_chain(
     pinecone_api_key: str,
@@ -31,9 +34,7 @@ def build_qa_chain(
     """
     # 1) Validate env vars
     if not pinecone_api_key or not index_name or not openai_api_key:
-        raise RuntimeError(
-            "Missing one of PINECONE_API_KEY, index_name, or OPENAI_API_KEY"
-        )
+        raise RuntimeError("Missing one of PINECONE_API_KEY, index_name, or OPENAI_API_KEY")
 
     # 2) Monkey-patch Pinecone
     if not hasattr(pinecone, "__version__"):
@@ -82,6 +83,7 @@ def build_qa_chain(
 
     return qa_chain, vectorstore
 
+
 if __name__ == "__main__":
     pinecone_api_key = os.getenv("PINECONE_API_KEY")
     pinecone_env = os.getenv("PINECONE_ENVIRONMENT") or os.getenv("PINECONE_ENV", "us-west1-gcp")
@@ -89,11 +91,14 @@ if __name__ == "__main__":
     openai_api_key = os.getenv("OPENAI_API_KEY")
     k = 3
 
+    if pinecone_api_key is None or pinecone_env is None or openai_api_key is None:
+        raise RuntimeError("Missing Pinecone/OpenAI configuration")
+
     qa, _ = build_qa_chain(
-        pinecone_api_key=pinecone_api_key,
-        pinecone_env=pinecone_env,
+        pinecone_api_key=cast(str, pinecone_api_key),
+        pinecone_env=cast(str, pinecone_env),
         index_name=index_name,
-        openai_api_key=openai_api_key,
+        openai_api_key=cast(str, pinecone_env),
         k=k,
     )
 

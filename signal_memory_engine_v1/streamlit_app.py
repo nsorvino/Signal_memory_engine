@@ -1,9 +1,10 @@
 import os
 from urllib.parse import urljoin
 
-import streamlit as st
-import requests
 import matplotlib.pyplot as plt
+import requests
+import streamlit as st
+
 from dashboard import show_dashboard
 
 # Basic Streamlit UI for Signal Memory RAG backend with drift visualization
@@ -14,10 +15,11 @@ from dashboard import show_dashboard
 
 PROBE_PATHS = ("/healthz", "/health", "/docs", "/")  # try a few common endpoints
 CANDIDATE_URLS = (
-    os.getenv("BACKEND_URL"),       # if provided via environment/compose
-    "http://backend:8000",          # works from inside Docker
-    "http://localhost:8000",        # works from host
+    os.getenv("BACKEND_URL"),  # if provided via environment/compose
+    "http://backend:8000",  # works from inside Docker
+    "http://localhost:8000",  # works from host
 )
+
 
 def backend_is_running(base_url: str, timeout: float = 0.75) -> bool:
     """Return True if any probe path responds (2xx or 4xx is fine)."""
@@ -32,6 +34,7 @@ def backend_is_running(base_url: str, timeout: float = 0.75) -> bool:
             continue
     return False
 
+
 def pick_backend() -> str:
     """Pick the first reachable candidate URL; otherwise fall back to localhost."""
     for url in CANDIDATE_URLS:
@@ -43,7 +46,9 @@ def pick_backend() -> str:
             return url
     return "http://localhost:8000"
 
+
 # ---- Plotting / UI helpers ---------------------------------------------------
+
 
 def plot_drift(scores: dict):
     """
@@ -128,7 +133,7 @@ def main():
             display_flag(data.get("flag", ""), data.get("suggestion", ""))
 
             # Drift Gauge
-            top_score = max((c['score'] for c in data.get('chunks', [])), default=0.0)
+            top_score = max((c["score"] for c in data.get("chunks", [])), default=0.0)
             st.subheader("Drift Gauge")
             fig = plot_drift({mode: top_score})
             st.pyplot(fig)
@@ -153,7 +158,7 @@ def main():
                 display_flag(result.get("flag", ""), result.get("suggestion", ""))
 
                 # collect for drift chart
-                top = max((c['score'] for c in result.get('chunks', [])), default=0.0)
+                top = max((c["score"] for c in result.get("chunks", [])), default=0.0)
                 drift_scores[role] = top
 
             st.subheader("Drift Visualization")

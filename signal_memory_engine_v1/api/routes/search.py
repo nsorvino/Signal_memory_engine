@@ -1,14 +1,14 @@
 # api/routes/search.py
-from typing import List
+
 from fastapi import APIRouter, HTTPException, Query
 
-from api.models import MemoryMatch
 from api import deps
+from api.models import MemoryMatch
 
 router = APIRouter(tags=["search"])
 
 
-@router.get("/memory/search", response_model=List[MemoryMatch])
+@router.get("/memory/search", response_model=list[MemoryMatch])
 def search_memory(
     q: str = Query(..., description="Natural-language query"),
     top_k: int = Query(3, ge=1, le=20),
@@ -30,7 +30,7 @@ def search_memory(
         raise HTTPException(status_code=500, detail=f"Pinecone query error: {e}")
 
     # 3) Normalize response
-    out: List[MemoryMatch] = []
+    out: list[MemoryMatch] = []
     matches = getattr(resp, "matches", resp.get("matches", []))
     for m in matches:
         # support SDK object or dict
@@ -50,7 +50,7 @@ def search_memory(
     return out
 
 
-@router.get("/memory/vector_query", response_model=List[MemoryMatch])
+@router.get("/memory/vector_query", response_model=list[MemoryMatch])
 def vector_query(
     q: str = Query(..., description="Natural-language query (low-level vector path)"),
     top_k: int = Query(3, ge=1, le=20),
