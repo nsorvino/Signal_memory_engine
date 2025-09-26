@@ -136,7 +136,7 @@ def install(force: bool = False) -> None:
     sys.modules["pinecone.db_data"] = db_data_mod
     sys.modules["pinecone.db_data.index"] = db_index_mod
 
-    # ensure your own module exposes `index` when imported directly
+    # ensure module exposes `index` when imported directly
     try:
         pci = importlib.import_module("vector_store.pinecone_index")
         if not hasattr(pci, "index"):

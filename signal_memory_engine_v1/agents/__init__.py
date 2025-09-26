@@ -24,10 +24,12 @@ AGENT_INDEXES = {
 
 # 3) Initialize (or recreate if mismatched) each one
 for name, cfg in AGENT_INDEXES.items():
-    init_pinecone_index(
-        api_key=PINECONE_API_KEY,
-        environment=PINECONE_ENV,
-        index_name=name,
-        dimension=cfg["dimension"],
-        metric=cfg["metric"],
-    )
+    # Only initialize if we have a real API key and we're not in test mode
+    if os.getenv("PINECONE_API_KEY") and os.getenv("PINECONE_API_KEY") != "dummy":
+        init_pinecone_index(
+            api_key=PINECONE_API_KEY,
+            environment=PINECONE_ENV,
+            index_name=name,
+            dimension=cfg["dimension"],
+            metric=cfg["metric"],
+        )
