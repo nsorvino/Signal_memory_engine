@@ -158,3 +158,16 @@ All notable changes introduced in **PR A — Core/API**.
 
 ### Notes
 - No API behavior changes; additions are CI/test/dev-experience only.
+
+## 2025-09-25 - prD Docs
+
+### Added
+- `.env.example` with sane defaults, including `LOG_LEVEL`.
+- `docs/adr/ADR-0001-v2-backbone.md` — 1-pager capturing v2 architecture/testing decisions.
+- PDFs and Diagrams to explain app flow to simplify onboarding
+
+### Changed
+- `README.md` updated with CI/testing flow, Makefile targets, Docker notes, helpful documents, and logging guidance.
+
+### Impact
+- Documentation-only; improves onboarding and consistency. No runtime changes.
