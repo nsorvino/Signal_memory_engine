@@ -9,11 +9,11 @@ from pathlib import Path
 from typing import Any
 
 from vector_store.embeddings import get_embedder
-from vector_store.pinecone_index import index, init_pinecone_index
+from vector_store.pinecone_index import init_pinecone_index
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-PINECONE_ENV = os.getenv("PINECONE_ENV", "us-east-1")
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY", "")
+PINECONE_ENV = os.getenv("PINECONE_ENV", "us-west1-gcp")
 INDEX_NAME = os.getenv("PINECONE_INDEX", "signal-engine")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -27,7 +27,7 @@ DATA_FILES = [
 ]
 
 # ── INITIALIZE ──────────────────────────────────────────────────────────────
-init_pinecone_index(
+index = init_pinecone_index(
     api_key=PINECONE_API_KEY,
     environment=PINECONE_ENV,
     index_name=INDEX_NAME,
