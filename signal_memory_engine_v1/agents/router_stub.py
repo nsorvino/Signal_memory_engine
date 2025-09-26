@@ -1,7 +1,8 @@
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
+
 # from storage.sqlite_store import init_db, insert_event
 # from utils.dashboard import send_to_dashboard
 from storage.sqlite_store import init_db, insert_event
@@ -9,6 +10,7 @@ from utils.dashboard import send_to_dashboard
 
 DB_PATH = os.getenv("SME_DB_PATH", "./data/signal.db")
 init_db(DB_PATH)
+
 
 def route_and_log_event(
     user_id: str,
@@ -62,10 +64,10 @@ def route_and_log_event(
 
     return {**decision, "event_id": event_id}
 
-def route_agent(user_query: str,
-                emotional_tone: Any,
-                signal_type: Any,
-                drift_score: Any) -> Dict[str, Any]:
+
+def route_agent(
+    user_query: str, emotional_tone: Any, signal_type: Any, drift_score: Any
+) -> dict[str, Any]:
     """
     Decide which agent should handle the incoming query based on emotional tone, signal type, and drift score.
 
@@ -115,7 +117,7 @@ def route_agent(user_query: str,
     return {"selected_agent": "Selah", "reason": "Fallback routing"}
 
 
-def log_routing_decision(decision: Dict[str, Any], logfile: str = "router_log.jsonl") -> None:
+def log_routing_decision(decision: dict[str, Any], logfile: str = "router_log.jsonl") -> None:
     """
     Append a routing decision to a JSONL log file, including a timestamp.
 
@@ -124,7 +126,7 @@ def log_routing_decision(decision: Dict[str, Any], logfile: str = "router_log.js
         logfile (str): Path to the log file.
     """
     entry = {"timestamp": datetime.utcnow().isoformat(), **decision}
-    with open(logfile, 'a') as f:
+    with open(logfile, "a") as f:
         f.write(json.dumps(entry) + "\n")
 
 
@@ -139,7 +141,7 @@ if __name__ == "__main__":
         ("Invalid tone type", "bad", "relational", 0.0),
         ("Tone out of range", -0.1, "relational", 0.0),
         ("Drift out of range", 0.1, "relational", 1.5),
-        ("Invalid signal type", 0.1, None, 0.0)
+        ("Invalid signal type", 0.1, None, 0.0),
     ]
     for query, tone, sig, drift in tests:
         decision = route_agent(query, tone, sig, drift)

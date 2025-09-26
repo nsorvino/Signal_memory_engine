@@ -1,5 +1,8 @@
 # cli/healthcheck.py
-import sys, json, urllib.request
+import json
+import sys
+import urllib.request
+
 
 def main():
     URL = "http://localhost:8000/health"
@@ -10,6 +13,7 @@ def main():
         sys.exit(0 if data.get("status") == "ok" else 1)
     except Exception:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,9 @@
 # agents/sentinel.py
 import os
 from functools import lru_cache
+
 from dotenv import load_dotenv
+
 from scripts.langchain_retrieval import build_qa_chain
 
 load_dotenv()

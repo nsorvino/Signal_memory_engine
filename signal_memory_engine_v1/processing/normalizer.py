@@ -3,9 +3,10 @@
 
 import re
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
-def normalize_event(raw: Dict[str, Any]) -> Dict[str, Any]:
+
+def normalize_event(raw: dict[str, Any]) -> dict[str, Any]:
     """
     Take a raw event dict (e.g. chat message, biometric sample, log line)
     and return a clean, well‐typed version with:
@@ -13,13 +14,13 @@ def normalize_event(raw: Dict[str, Any]) -> Dict[str, Any]:
       - ISO-8601 timestamp
       - stripped control characters/HTML
     """
-    clean: Dict[str, Any] = {}
+    clean: dict[str, Any] = {}
 
     # 1) Canonicalize timestamp
     ts = raw.get("timestamp") or raw.get("time") or raw.get("ts")
     try:
         # if it's numeric (epoch), convert to ISO
-        if isinstance(ts, (int, float)):
+        if isinstance(ts, int | float):
             clean["timestamp"] = datetime.fromtimestamp(ts).isoformat()
         else:
             clean["timestamp"] = datetime.fromisoformat(str(ts)).isoformat()
@@ -33,7 +34,7 @@ def normalize_event(raw: Dict[str, Any]) -> Dict[str, Any]:
     text = re.sub(r"[\r\n\t]+", " ", text).strip()
     clean["text"] = text
 
-    # 3) Source / agent tag  
+    # 3) Source / agent tag
     clean["source"] = raw.get("agent") or raw.get("source") or "unknown"
 
     # 4) Carry forward any other metadata

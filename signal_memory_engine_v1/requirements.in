@@ -8,14 +8,16 @@ orjson~=3.11
 
 mlflow~=3.2
 openai~=1.106
+
+# Pinecone SDK (required by langchain_pinecone 0.2.x)
 pinecone-client>=3,<7
 
-# LangChain stack (0.3.x line to match your lock)
+# LangChain stack (stay on 0.3.x line)
 langchain~=0.3
 langchain-core~=0.3
 langchain-community~=0.3
 langchain-openai~=0.3
-langchain-huggingface~=0.1   # NEW: fixes HuggingFaceEmbeddings deprecation
+langchain-huggingface~=0.1
 langchain-pinecone~=0.2
 
 # Embeddings / ML
@@ -24,11 +26,16 @@ tiktoken~=0.11
 numpy~=1.26
 pandas~=2.3
 scikit-learn~=1.7
-torch==2.2.2            # pinned to avoid surprise CUDA/ABI shifts
+# Pinned to avoid surprise CUDA/ABI changes
+torch==2.2.2
 
-# UI (optional in your repo, kept since it’s in your lock)
+# UI (optional – included because it’s in your lock)
 streamlit~=1.49
 
 # --- Dev/Test ---
 pytest~=8.4
 ruff~=0.13
+black~=24.10
+mypy~=1.11
+pre-commit~=3.8
+pip-tools~=7.4

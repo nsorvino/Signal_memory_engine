@@ -1,4 +1,7 @@
 import os
+from typing import cast
+
+import pinecone
 from dotenv import load_dotenv
 
 # Quiet HF tokenizers fork warning
@@ -12,6 +15,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
+
 
 def build_qa_chain(
     pinecone_api_key: str,           # kept for signature parity (unused here)
@@ -67,6 +71,9 @@ if __name__ == "__main__":
     index_name = os.getenv("PINECONE_INDEX", "signal-engine")
     openai_api_key = os.getenv("OPENAI_API_KEY")
     k = 3
+
+    if pinecone_api_key is None or pinecone_env is None or openai_api_key is None:
+        raise RuntimeError("Missing Pinecone/OpenAI configuration")
 
     qa, _ = build_qa_chain(
         pinecone_api_key=pinecone_api_key or "",

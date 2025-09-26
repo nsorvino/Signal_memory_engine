@@ -1,7 +1,8 @@
 # ============================================================================
 # api/models.py (consolidated models)
 # ============================================================================
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -17,7 +18,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     answer: str
-    chunks: List[Chunk]
+    chunks: list[Chunk]
     flag: str
     suggestion: str
     trust_score: float
@@ -25,14 +26,14 @@ class QueryResponse(BaseModel):
 
 class AgentResponse(BaseModel):
     answer: str
-    chunks: List[Chunk]
+    chunks: list[Chunk]
     flag: str
     suggestion: str
     trust_score: float
 
 
 class MultiQueryResponse(BaseModel):
-    agents: Dict[str, AgentResponse]
+    agents: dict[str, AgentResponse]
 
 
 class TraceRecord(BaseModel):
@@ -47,10 +48,10 @@ class TraceRecord(BaseModel):
 class MemoryMatch(BaseModel):
     id: str
     score: float
-    text: Optional[str] = None
-    agent: Optional[str] = None
-    tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    text: str | None = None
+    agent: str | None = None
+    tags: list[str] | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class SignalEventIn(BaseModel):
@@ -58,11 +59,11 @@ class SignalEventIn(BaseModel):
     user_query: str
     signal_type: str
     drift_score: float = Field(ge=0, le=1)
-    emotional_tone: Optional[float] = Field(default=0.0, ge=0, le=1)
-    agent_id: Optional[str] = None
-    payload: Optional[dict] = None
-    relationship_context: Optional[str] = None
-    diagnostic_notes: Optional[str] = None
+    emotional_tone: float | None = Field(default=0.0, ge=0, le=1)
+    agent_id: str | None = None
+    payload: dict | None = None
+    relationship_context: str | None = None
+    diagnostic_notes: str | None = None
 
 
 class SignalEventOut(SignalEventIn):

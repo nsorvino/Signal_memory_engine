@@ -1,13 +1,15 @@
 # ============================================================================
 # api/routes/signal.py  →  /signal + /drift endpoints
 # ============================================================================
-import os
 import json as _json
+import os
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, status, Query
+
+from fastapi import APIRouter, HTTPException, Query, status
+
+from agents.router_stub import log_routing_decision, route_agent
 from api.models import SignalEventIn, SignalEventOut
 from storage.sqlite_store import init_db, insert_event, list_by_user
-from agents.router_stub import route_agent, log_routing_decision
 from utils.dashboard import send_to_dashboard
 
 router = APIRouter()
@@ -41,7 +43,9 @@ def log_signal(event: SignalEventIn):
     try:
         event_id = insert_event(DB_PATH, stored)
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to persist signal") from e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to persist signal"
+        ) from e
     stored["id"] = event_id
 
     log_routing_decision(

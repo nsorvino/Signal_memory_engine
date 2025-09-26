@@ -4,7 +4,7 @@ Common utilities for mapping RAG hits (Document, score) pairs into normalized ev
 """
 import hashlib
 from datetime import datetime
-from typing import List, Tuple, Dict, Any, Optional
+from typing import Any
 
 from langchain.schema import Document
 
@@ -44,17 +44,18 @@ def flag_from_score(score: float) -> str:
     else:
         return "stable"
 
+
 SUGGESTIONS = {
-    "stable":   "No action needed.",
+    "stable": "No action needed.",
     "drifting": "Consider sending a check-in message.",
-    "concern":  "Recommend escalation or a one-on-one conversation."
+    "concern": "Recommend escalation or a one-on-one conversation.",
 }
 
 
 def map_events_to_memory(
-    docs_and_scores: List[Tuple[Document, float]],
-    source_agent: Optional[str] = None,
-) -> List[Dict[str, Any]]:
+    docs_and_scores: list[tuple[Document, float]],
+    source_agent: str | None = None,
+) -> list[dict[str, Any]]:
     """
     Convert a list of (Document, score) into a list of normalized event dictionaries.
 
@@ -68,7 +69,7 @@ def map_events_to_memory(
       - suggestion: action suggestion based on the flag
       - metadata: other metadata fields, if any
     """
-    events: List[Dict[str, Any]] = []
+    events: list[dict[str, Any]] = []
     for doc, score in docs_and_scores:
         meta = doc.metadata or {}
         ts_raw = meta.get("timestamp")
@@ -77,7 +78,7 @@ def map_events_to_memory(
         flag = flag_from_score(score)
         suggestion = SUGGESTIONS.get(flag, "")
 
-        event: Dict[str, Any] = {
+        event: dict[str, Any] = {
             "event_id": generate_event_id(doc.page_content, timestamp or ""),
             "content": doc.page_content.strip(),
             "score": score,

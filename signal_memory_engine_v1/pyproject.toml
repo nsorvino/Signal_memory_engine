@@ -1,0 +1,40 @@
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["venv", ".venv", "mlruns", "data", "node_modules"]
+
+[tool.ruff.lint]
+# E,F = pycodestyle/pyflakes; I = import sorting; UP = pyupgrade
+select = ["E", "F", "I", "UP"]
+ignore = ["E402", "E501"]
+
+[tool.mypy]
+python_version = "3.10"
+# treat THIS folder as the package root; works with MYPYPATH in CI
+mypy_path = "."
+explicit_package_bases = true
+
+# keep third-party missing stubs quiet
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+
+# IMPORTANT: patterns must match the module names mypy "sees"
+# When MYPYPATH=signal_memory_engine_v1, modules look like api.*, scripts.*, etc.
+[[tool.mypy.overrides]]
+module = [
+  "scripts.*",
+  "api.*",
+  "utils.llm",
+  "sensors.biometric",
+  "vector_store.*",
+  "processing.stream_processor",
+  "core",
+  "agents.*",
+]
+ignore_errors = true

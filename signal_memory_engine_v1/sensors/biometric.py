@@ -4,14 +4,15 @@ Simulated biometric sampling, including future metrics (GSR) and auto-tagged emo
 """
 import os
 import random
-from typing import Dict
+from typing import Any
+
 import openai
 
 # Load OpenAI key for emotion classification
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
-def sample_all_signals() -> Dict[str, any]:
+def sample_all_signals() -> dict[str, Any]:
     """
     Return a dictionary of current biometric readings, including:
       - HRV (ms)

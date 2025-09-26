@@ -1,18 +1,22 @@
-import os, json, sqlite3
+import json
+import os
+import sqlite3
 from datetime import datetime
-from typing import Optional, Iterable
 
 SCHEMA_VERSION = 1
+
 
 def _conn(db_path: str):
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     return sqlite3.connect(db_path, check_same_thread=False)
 
+
 def init_db(db_path: str):
     with _conn(db_path) as cx:
         cx.execute("CREATE TABLE IF NOT EXISTS schema_meta(version INTEGER NOT NULL)")
         version = cx.execute("SELECT version FROM schema_meta LIMIT 1").fetchone()
-        cx.execute("""CREATE TABLE IF NOT EXISTS events(
+        cx.execute(
+            """CREATE TABLE IF NOT EXISTS events(
             id INTEGER PRIMARY KEY,
             timestamp TEXT NOT NULL,
             user_id TEXT,
@@ -24,16 +28,32 @@ def init_db(db_path: str):
             payload TEXT,
             relationship_context TEXT,
             diagnostic_notes TEXT
-        )""")
+        )"""
+        )
         if not version:
             cx.execute("INSERT INTO schema_meta(version) VALUES (?)", (SCHEMA_VERSION,))
         cx.commit()
 
+
 def insert_event(db_path: str, event: dict) -> int:
     with _conn(db_path) as cx:
-        cols = ("timestamp","user_id","agent_id","signal_type","emotional_tone",
-                "drift_score","escalate_flag","payload","relationship_context","diagnostic_notes")
-        payload = json.dumps(event.get("payload")) if isinstance(event.get("payload"), (dict, list)) else event.get("payload")
+        cols = (
+            "timestamp",
+            "user_id",
+            "agent_id",
+            "signal_type",
+            "emotional_tone",
+            "drift_score",
+            "escalate_flag",
+            "payload",
+            "relationship_context",
+            "diagnostic_notes",
+        )
+        payload = (
+            json.dumps(event.get("payload"))
+            if isinstance(event.get("payload"), dict | list)
+            else event.get("payload")
+        )
         row = (
             event.get("timestamp") or datetime.utcnow().isoformat(),
             event.get("user_id"),
@@ -46,9 +66,12 @@ def insert_event(db_path: str, event: dict) -> int:
             event.get("relationship_context"),
             event.get("diagnostic_notes"),
         )
-        cx.execute(f"INSERT INTO events({','.join(cols)}) VALUES ({','.join(['?']*len(cols))})", row)
+        cx.execute(
+            f"INSERT INTO events({','.join(cols)}) VALUES ({','.join(['?']*len(cols))})", row
+        )
         cx.commit()
         return cx.execute("SELECT last_insert_rowid()").fetchone()[0]
+
 
 def list_recent(db_path: str, limit: int = 10) -> list[dict]:
     with _conn(db_path) as cx:
@@ -56,8 +79,11 @@ def list_recent(db_path: str, limit: int = 10) -> list[dict]:
         cols = [c[1] for c in cx.execute("PRAGMA table_info(events)")]
         return [dict(zip(cols, r)) for r in rows]
 
+
 def list_by_user(db_path: str, user_id: str, limit: int = 10) -> list[dict]:
     with _conn(db_path) as cx:
-        rows = cx.execute("SELECT * FROM events WHERE user_id=? ORDER BY id DESC LIMIT ?", (user_id, limit)).fetchall()
+        rows = cx.execute(
+            "SELECT * FROM events WHERE user_id=? ORDER BY id DESC LIMIT ?", (user_id, limit)
+        ).fetchall()
         cols = [c[1] for c in cx.execute("PRAGMA table_info(events)")]
         return [dict(zip(cols, r)) for r in rows]

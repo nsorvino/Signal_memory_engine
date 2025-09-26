@@ -1,14 +1,18 @@
 # utils/llm.py
-from fastapi import HTTPException, status
 import httpx
+from fastapi import HTTPException, status
 
 # OpenAI 1.x exceptions (present if openai is installed)
 try:
-    from openai import RateLimitError, APITimeoutError, APIConnectionError
+    from openai import APIConnectionError, APITimeoutError, RateLimitError
 except Exception:  # fallback if package/exceptions move
-    class RateLimitError(Exception): ...
-    class APITimeoutError(Exception): ...
-    class APIConnectionError(Exception): ...
+
+    RateLimitError = Exception
+
+    APITimeoutError = Exception
+
+    APIConnectionError = Exception
+
 
 def _coerce_output(out):
     """Return a string answer from common LC chain outputs."""
@@ -18,6 +22,7 @@ def _coerce_output(out):
                 return out[k]
         return str(out)
     return out if isinstance(out, str) else str(out)
+
 
 def invoke_chain(chain, prompt: str):
     """
@@ -44,30 +49,23 @@ def invoke_chain(chain, prompt: str):
     # Map OpenAI / network-ish errors
     except RateLimitError as e:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="LLM quota/rate limit"
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="LLM quota/rate limit"
         ) from e
     except (APITimeoutError, httpx.TimeoutException, httpx.ReadTimeout, httpx.ConnectTimeout) as e:
         raise HTTPException(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail="LLM timeout"
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="LLM timeout"
         ) from e
     except (APIConnectionError, httpx.HTTPError) as e:
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="LLM upstream error"
+            status_code=status.HTTP_502_BAD_GATEWAY, detail="LLM upstream error"
         ) from e
     # If LangChain/OpenAI wraps errors, heuristically detect 429/quota text
     except Exception as e:
         msg = str(e).lower()
         if "insufficient_quota" in msg or "rate limit" in msg or "429" in msg:
             raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="LLM quota/rate limit"
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="LLM quota/rate limit"
             ) from e
         if isinstance(e, HTTPException):
             raise
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        ) from e
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)) from e

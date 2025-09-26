@@ -19,9 +19,9 @@ def flag_from_score(score: float) -> str:
         return "stable"
 
 SUGGESTIONS = {
-    "stable":   "No action needed.",
+    "stable": "No action needed.",
     "drifting": "Consider sending a check-in message.",
-    "concern":  "Recommend escalation or a one-on-one conversation."
+    "concern": "Recommend escalation or a one-on-one conversation.",
 }
 
 def build_qa_chain(
