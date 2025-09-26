@@ -10,6 +10,8 @@ RUN micromamba create -y -f /tmp/environment.yml && micromamba clean -a -y
 ARG ENV_NAME=sme310
 ENV CONDA_DEFAULT_ENV=${ENV_NAME}
 ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:$PATH
+# added this so importable everywhere
+ENV PYTHONPATH=/app
 
 # Lock-based install
 COPY requirements-lock.txt ./
@@ -24,7 +26,6 @@ USER mambauser
 
 EXPOSE 8000
 
-# container-level healthcheck using the CLI
 HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
   CMD python scripts/sme_healthcheck.py || exit 1
 

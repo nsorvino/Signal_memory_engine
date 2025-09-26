@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+# scripts/smoke_test.py
+import os
+
+if (
+    os.getenv("SME_TEST_MODE") == "1"
+    or os.getenv("RUN_API_SMOKE") == "0"
+    or os.getenv("PINECONE_API_KEY") == "dummy"
+):
+    try:
+        from utils.pinecone_stub import install as _install_pinecone_stub
+
+        _install_pinecone_stub()
+    except Exception:
+        pass
+
+
 import argparse
 import sys
 import time
