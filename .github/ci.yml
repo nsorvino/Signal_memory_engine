@@ -1,0 +1,88 @@
+name: CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pip:
+    name: pip • ${{ matrix.os }} • py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install deps (pip)
+        run: |
+          cd signal_memory_engine_v1
+          python -m pip install --upgrade "pip<25"
+          if [ -f requirements-lock.txt ]; then
+            pip install -r requirements-lock.txt
+          else
+            pip install -r requirements.in
+          fi
+          # tooling + type stubs to quiet mypy
+          pip install pytest pytest-cov mypy ruff types-requests types-setuptools pandas-stubs
+      - name: Lint
+        run: ruff check signal_memory_engine_v1
+      - name: Type check
+        env:
+          MYPYPATH: signal_memory_engine_v1
+        run: mypy --config-file signal_memory_engine_v1/pyproject.toml signal_memory_engine_v1
+      - name: Test (coverage>=80)
+        env:
+          PINECONE_API_KEY: dummy
+          OPENAI_API_KEY: dummy
+        run: pytest signal_memory_engine_v1/tests --cov=signal_memory_engine_v1 --cov-report=term-missing --cov-config=.coveragerc
+
+
+  conda:
+    name: conda • ubuntu-latest • py3.10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: signal_memory_engine_v1/environment.yml
+          cache-environment: true
+          micromamba-version: latest
+      - name: Run tests
+        shell: bash -l {0}
+        env:
+          PINECONE_API_KEY: dummy
+          OPENAI_API_KEY: dummy
+        run: |
+          python -m pip install pytest pytest-cov
+          pytest signal_memory_engine_v1/tests --cov=signal_memory_engine_v1 --cov-report=term-missing --cov-fail-under=80
+
+
+  docker:
+    name: docker • build + smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # build context stays the v1 folder, as you had it
+      - name: Build backend image
+        run: docker build -t sme-backend -f signal_memory_engine_v1/dockerfile.backend signal_memory_engine_v1
+
+      - name: Run smoke (inside container, offline)
+        run: |
+          docker run --rm \
+            -e RUN_API_SMOKE=0 \
+            -e SME_TEST_MODE=1 \
+            -e PINECONE_API_KEY=dummy \
+            -e OPENAI_API_KEY=dummy \
+            -e PINECONE_INDEX=axis-memory \
+            -e PINECONE_INDEXES=axis-memory,sentinel-memory,oria-memory,test-index \
+            -e PINECONE_DIMENSION=384 \
+            -e PYTHONPATH=/app \
+            -w /app \
+            sme-backend \
+            python -m scripts.smoke_test
