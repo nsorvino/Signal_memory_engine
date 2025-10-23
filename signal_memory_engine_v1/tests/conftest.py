@@ -14,11 +14,7 @@ os.environ.setdefault("OPENAI_API_KEY", "test-openai")
 # Force offline path to guarantee stub usage during tests
 os.environ.setdefault("PINECONE_API_KEY", "dummy")
 
-<<<<<<< HEAD
 # Make sure every index referenced exists in the stub
-=======
-# Make sure every index your code references exists in the stub
->>>>>>> test(tooling): add CI/test harness, centralize Pinecone stub, and consolidate bootstrap
 os.environ.setdefault("PINECONE_INDEX", "axis-memory")
 os.environ.setdefault(
     "PINECONE_INDEXES",
