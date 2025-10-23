@@ -1,0 +1,12 @@
+execution_duration_ms: 34
+request_preview: '{"query": "Current biometric readings:\n• HRV: 62.1 ms\n• Temp:
+  36.1 °C\n• Blink rate: 19.1 bpm\n\nUse this context to answer the question below.\n\nQuestion:
+  hi"}'
+request_time: '2025-10-23T21:45:24.051Z'
+response_preview: ''
+state: ERROR
+trace_id: tr-05d6e1be336aac330f70bb755debf60b
+trace_location:
+  mlflow_experiment:
+    experiment_id: '772945297342284724'
+  type: MLFLOW_EXPERIMENT

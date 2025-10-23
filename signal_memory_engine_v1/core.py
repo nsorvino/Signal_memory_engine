@@ -6,7 +6,9 @@ import pinecone
 from langchain_community.chat_models import ChatOpenAI
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Pinecone as LC_Pinecone
-from langchain.chains import RetrievalQA
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
 
@@ -19,12 +21,12 @@ def build_qa_chain(
     llm_model: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
     k: int = 3,
     text_key: str = "content",
-) -> tuple[RetrievalQA, LC_Pinecone]:
+) -> tuple[object, LC_Pinecone]:
     """
-    Build and return a RetrievalQA chain + Pinecone vectorstore client.
+    Build and return a retrieval chain + Pinecone vectorstore client.
 
     Returns:
-        qa_chain: LangChain RetrievalQA
+        qa_chain: LangChain retrieval chain (created with create_retrieval_chain)
         vectorstore: Pinecone vectorstore (for similarity_search_with_score)
     """
     # 1) Validate env vars
@@ -57,12 +59,26 @@ def build_qa_chain(
         max_tokens=256,
     )
 
-    # 5) Build QA chain
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
+    # 5) Build retrieval chain using create_retrieval_chain
+    # Define the system prompt
+    system_prompt = (
+        "Use the given context to answer the question. "
+        "If you don't know the answer, say you don't know. "
+        "Use three sentences maximum and keep the answer concise. "
+        "Context: {context}"
     )
+
+    # Create the prompt template
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "{input}"),
+    ])
+
+    # Create the document combination chain
+    question_answer_chain = create_stuff_documents_chain(llm, prompt)
+
+    # Create the retrieval chain
+    qa_chain = create_retrieval_chain(retriever, question_answer_chain)
 
     return qa_chain, vectorstore
 
@@ -82,7 +98,7 @@ if __name__ == "__main__":
     )
 
     question = "What is emotional recursion?"
-    out = qa.invoke({"query": question})
-    answer = out.get("result") if isinstance(out, dict) else str(out)
+    out = qa.invoke({"input": question})
+    answer = out.get("answer") if isinstance(out, dict) else str(out)
 
     print(f"Q: {question}\nA: {answer}")

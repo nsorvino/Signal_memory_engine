@@ -2,15 +2,17 @@
 """
 scripts/langchain_retrieval.py
 
-Module to build and return a RetrievalQA chain and Pinecone vectorstore,
+Module to build and return a retrieval chain and Pinecone vectorstore,
 with helper functions for signal-flag scoring and suggestions.
 """
 
 import pinecone
 import logging
-from langchain.chains import RetrievalQA
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import Pinecone as LC_Pinecone
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 
@@ -49,12 +51,12 @@ def build_qa_chain(
     embed_model: str = "sentence-transformers/all-MiniLM-L6-v2",
     llm_model: str = "gpt-3.5-turbo",
     k: int = 3,
-) -> tuple[RetrievalQA, LC_Pinecone]:
+) -> tuple[object, LC_Pinecone]:
     """
-    Initialize Pinecone, embeddings, vectorstore, and a RetrievalQA chain using OpenAI or HF-ST.
+    Initialize Pinecone, embeddings, vectorstore, and a retrieval chain using OpenAI or HF-ST.
 
     Returns:
-        qa_chain: LangChain RetrievalQA
+        qa_chain: LangChain retrieval chain (created with create_retrieval_chain)
         vectorstore: Pinecone vector store client
     """
     # 1) Monkey-patch Pinecone
@@ -94,12 +96,26 @@ def build_qa_chain(
         max_tokens=256,
     )
 
-    # 5) Build a standard RetrievalQA chain (default prompt only needs a single string)
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=retriever,
+    # 5) Build a retrieval chain using create_retrieval_chain
+    # Define the system prompt
+    system_prompt = (
+        "Use the given context to answer the question. "
+        "If you don't know the answer, say you don't know. "
+        "Use three sentences maximum and keep the answer concise. "
+        "Context: {context}"
     )
-    logger.debug("QA chain initialized with default prompt template")
+
+    # Create the prompt template
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", system_prompt),
+        ("human", "{input}"),
+    ])
+
+    # Create the document combination chain
+    question_answer_chain = create_stuff_documents_chain(llm, prompt)
+
+    # Create the retrieval chain
+    qa_chain = create_retrieval_chain(retriever, question_answer_chain)
+    logger.debug("QA chain initialized with create_retrieval_chain")
 
     return qa_chain, vectorstore
