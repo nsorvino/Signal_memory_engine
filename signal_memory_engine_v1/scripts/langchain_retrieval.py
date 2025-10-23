@@ -6,7 +6,6 @@ Module to build and return a retrieval chain and Pinecone vectorstore,
 with helper functions for signal-flag scoring and suggestions.
 """
 
-<<<<<<< HEAD
 import logging
 
 import pinecone
@@ -17,14 +16,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import Pinecone as LC_Pinecone
 from langchain_community.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 from langchain_community.embeddings import OpenAIEmbeddings
-=======
-import logging
-
-import pinecone
-from langchain.chains import RetrievalQA
-from langchain_community.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
-from langchain_community.vectorstores import Pinecone as LC_Pinecone
->>>>>>> test(tooling): add CI/test harness, centralize Pinecone stub, and consolidate bootstrap
 from langchain_openai import ChatOpenAI
 
 # ── Configure logging ─────────────────────────────────────
