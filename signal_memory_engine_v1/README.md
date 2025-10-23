@@ -187,8 +187,6 @@ docker compose up --build
 python core.py
 ```
 
-> `core.py` builds a **RetrievalQA** chain and **Pinecone** vectorstore **without** the FastAPI server—useful for quick experiments.
-
 ---
 
 ## Endpoints
