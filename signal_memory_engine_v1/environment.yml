@@ -10,16 +10,16 @@ dependencies:
   - pandas
   - scipy
   - scikit-learn
-  - pytorch=2.5.1=*cpu_generic*
-  - uvicorn=0.35.0
-  - uvicorn-standard=0.35.0
-  - fastapi=0.116.2
+  - pytorch=2.2.2=*cpu_generic*
+  - uvicorn=0.38.0
+  - uvicorn-standard=0.38.0
+  - fastapi=0.120.0
   - starlette
   - httpx=0.28.1
   - anyio
   - h11
   - httpcore=1.0.9
-  - aiohttp=3.12.15
+  - aiohttp=3.13.1
   - aiosignal=1.4.0
   - yarl
   - attrs
@@ -27,7 +27,7 @@ dependencies:
   - idna
   - urllib3=2.5.0
   - certifi
-  - click=8.2.1
+  - click=8.3.0
   - colorama
   - jinja2
   - markupsafe
@@ -43,7 +43,7 @@ dependencies:
   - greenlet
   - networkx
   - sympy
-  - sqlalchemy=2.0.43
+  - sqlalchemy=2.0.44
   - orjson
   - regex
   - jsonschema
@@ -64,7 +64,7 @@ dependencies:
   - gitpython
   - smmap
   - pydeck
-  - mlflow=3.2.0
+  - mlflow=3.5.1
   - setuptools
   - wheel
   - tqdm
@@ -98,36 +98,6 @@ dependencies:
   - graphql-core=3.2.6
   - graphql-relay=3.2.0
 
-  # Anything that isn’t reliably on conda-forge (or you pinned very new)
+  # Let pip handle all Python-specific packages to avoid conflicts
   - pip:
-      - openai==1.106.1
-      - langchain==0.3.27
-      - langchain-community==0.3.31
-      - langchain-core==0.3.79
-      - langchain-huggingface==0.3.1
-      - langchain-openai==0.3.35
-      - langchain-pinecone==0.2.12
-      - langchain-text-splitters==0.3.11
-      - langsmith==0.4.38
-      - transformers==4.49.0
-      - tokenizers==0.21.1
-      - tiktoken==0.11.0
-      - sentence-transformers==5.1.0
-      - "pinecone[asyncio]>=7,<8"
-      - pinecone-plugin-assistant==1.8.0
-      - pinecone-plugin-interface==0.0.7
-      - safetensors==0.5.3
-      - simsimd==6.5.2
-      - narwhals==2.3.0
-      - propcache==0.3.2
-      - jiter==0.10.0
-      - python-dotenv==1.1.1
-      - requests-toolbelt==1.0.0
-      - streamlit==1.49.1
-      - aiohttp-retry==2.9.1
-      - hf-xet==1.1.10
-      - httpx-sse==0.4.1
-      - huggingface-hub==0.35.0
-      - rich==14.1.0
-      - rich-toolkit==0.15.1
-      - ruff==0.13.0
+      - -r requirements-lock.txt
