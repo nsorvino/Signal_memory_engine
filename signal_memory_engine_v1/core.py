@@ -1,25 +1,23 @@
 import os
-from typing import cast
 
-import pinecone
 from dotenv import load_dotenv
 
 # Quiet HF tokenizers fork warning
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_pinecone import PineconeVectorStore as LC_Pinecone
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_openai import ChatOpenAI
+from langchain_pinecone import PineconeVectorStore as LC_Pinecone
 
 load_dotenv()
 
 
 def build_qa_chain(
-    pinecone_api_key: str,           # kept for signature parity (unused here)
-    pinecone_env: str,               # kept for parity (unused)
+    pinecone_api_key: str,  # kept for signature parity (unused here)
+    pinecone_env: str,  # kept for parity (unused)
     index_name: str,
     openai_api_key: str,
     embed_model: str = "sentence-transformers/all-MiniLM-L6-v2",
@@ -51,14 +49,18 @@ def build_qa_chain(
     )
 
     # Prompt + LCEL chain
-    prompt = ChatPromptTemplate.from_messages([
-        ("system",
-         "Use the given context to answer the question. "
-         "If you don't know the answer, say you don't know. "
-         "Use three sentences maximum and keep the answer concise. "
-         "Context: {context}"),
-        ("human", "{input}"),
-    ])
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "Use the given context to answer the question. "
+                "If you don't know the answer, say you don't know. "
+                "Use three sentences maximum and keep the answer concise. "
+                "Context: {context}",
+            ),
+            ("human", "{input}"),
+        ]
+    )
 
     combine = create_stuff_documents_chain(llm, prompt)
     qa_chain = create_retrieval_chain(retriever, combine)
@@ -66,7 +68,7 @@ def build_qa_chain(
 
 
 if __name__ == "__main__":
-    pinecone_api_key = os.getenv("PINECONE_API_KEY")   # unused here but kept for parity
+    pinecone_api_key = os.getenv("PINECONE_API_KEY")  # unused here but kept for parity
     pinecone_env = os.getenv("PINECONE_ENVIRONMENT") or os.getenv("PINECONE_ENV", "us-west1-gcp")
     index_name = os.getenv("PINECONE_INDEX", "signal-engine")
     openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -88,9 +90,7 @@ if __name__ == "__main__":
 
     # Print the answer (and optionally show which docs were used)
     answer = (
-        result.get("answer")
-        if isinstance(result, dict) and "answer" in result
-        else str(result)
+        result.get("answer") if isinstance(result, dict) and "answer" in result else str(result)
     )
     print(f"Q: {question}\nA: {answer}")
 
