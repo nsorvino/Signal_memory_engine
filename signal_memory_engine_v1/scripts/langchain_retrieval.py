@@ -25,9 +25,7 @@ def flag_from_score(score: float) -> str:
 
 SUGGESTIONS = {
     "stable": "No action needed.",
-    "stable": "No action needed.",
     "drifting": "Consider sending a check-in message.",
-    "concern": "Recommend escalation or a one-on-one conversation.",
     "concern": "Recommend escalation or a one-on-one conversation.",
 }
 

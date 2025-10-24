@@ -108,7 +108,14 @@ All notable changes introduced in **PR A — Core/API**.
     USER mambauser
     ```
 - **MLflow PermissionError**
-  - Client was incorrectly trying to write files directly to the server’s file system and caused permission errors.
+  - Client was incorrectly trying to write files directly to the server's file system and caused permission errors.
+- **Pinecone dependency conflicts**
+  - Fixed `ImportError: cannot import name 'PineconeAsyncio' from 'pinecone'` by removing conflicting `pinecone-client` package.
+  - Updated to `pinecone[asyncio]>=7,<8` for proper async support.
+  - Resolved `networkx` and `scipy` version conflicts with Python 3.10 compatibility.
+- **Conda environment creation failures**
+  - Removed problematic version constraints from `environment.yml` that caused `libmamba Could not solve for environment specs` errors.
+  - Let conda install latest available versions while pip handles specific versions from `requirements-lock.txt`.
 
 ### Notes
 - No README/docs changes included here; documentation will land in **PR D**.
@@ -155,9 +162,49 @@ All notable changes introduced in **PR A — Core/API**.
   - `sitecustomize.py` updated to install the Pinecone stub at process start when `SME_TEST_MODE=1` or `RUN_API_SMOKE=0`, preventing early imports from making network calls during tests/CI.
 - **Type-checking**
   - Stub implementation made mypy-clean (removed unused `# type: ignore`, safer `setattr` usage).
+- **Vector store implementation**
+  - Replaced `langchain_pinecone` dependency with custom `PineconeVectorStore` implementation to avoid dependency conflicts.
+  - Updated imports in `core.py` and `scripts/langchain_retrieval.py` to use custom vector store.
+  - Implemented all required abstract methods (`from_texts`, `similarity_search_with_score`) for full LangChain compatibility.
+
+### Fixed
+- **CI/CD pipeline failures**
+  - Resolved `ImportError: cannot import name 'PineconeAsyncio' from 'pinecone'` in all CI environments (pip, conda, docker).
+  - Fixed `TypeError: Can't instantiate abstract class PineconeVectorStore with abstract method from_texts` by implementing missing abstract methods.
+  - Resolved `ValueError: "PineconeRetriever" object has no field "vectorstore"` by fixing Pydantic model implementation.
+  - Fixed Docker build failures with `libmamba Could not solve for environment specs` by removing problematic version constraints.
+  - Updated Ruff linting errors (import formatting, type annotations) to modern Python syntax.
 
 ### Notes
 - No API behavior changes; additions are CI/test/dev-experience only.
+
+## 2025-10-24 - CI/CD Runtime Fixes
+
+### Added
+- **Custom PineconeVectorStore implementation**
+  - `vector_store/pinecone_vectorstore.py` - Drop-in replacement for `langchain_pinecone.PineconeVectorStore`.
+  - Implements all required abstract methods: `from_texts`, `similarity_search_with_score`, `add_texts`, `similarity_search`.
+  - Compatible with both modern LangChain patterns and legacy RetrievalQA-style usage.
+  - Includes `PineconeRetriever` class with proper `_get_relevant_documents` implementation.
+
+### Changed
+- **Dependency management**
+  - Removed `pinecone-client` package to eliminate conflicts with `pinecone[asyncio]`.
+  - Updated `requirements.in` with explicit version constraints for Python 3.10 compatibility.
+  - Simplified `environment.yml` to let conda install latest versions while pip handles specific versions.
+  - Regenerated `requirements-lock.txt` for consistent dependency resolution.
+
+### Fixed
+- **CI/CD pipeline stability**
+  - All pytest jobs now pass without abstract method errors.
+  - Docker builds complete successfully without conda environment creation failures.
+  - Ruff linting passes with modern Python type annotations (`list` vs `List`, `X | None` vs `Optional[X]`).
+  - Conda environment creation works across all platforms (macOS, Linux, CI runners).
+
+### Migration Notes
+- **Backward compatibility**: All existing API routes continue to work without changes.
+- **Dependency changes**: `langchain_pinecone` removed, replaced with custom implementation.
+- **No breaking changes**: Existing code using `similarity_search_with_score` and modern LangChain patterns continues to work.
 
 ## 2025-09-25 - prD Docs
 
