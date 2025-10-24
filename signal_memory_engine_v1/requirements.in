@@ -10,8 +10,9 @@ contourpy<1.3.3 ; python_version < "3.11"
 mlflow~=3.2
 openai~=1.106
 
-# Pinecone SDK (required by langchain_pinecone 0.2.x)
-pinecone-client>=3,<7
+# Pinecone SDK required by langchain_pinecone 0.2.x
+# Must provide Pinecone + PineconeAsyncio
+pinecone-client>=5,<7
 
 # LangChain stack (stay on 0.3.x line)
 langchain~=0.3
