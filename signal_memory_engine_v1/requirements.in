@@ -11,7 +11,7 @@ openai~=1.106
 
 # Pinecone SDK required by langchain_pinecone 0.2.x
 # Must provide Pinecone + PineconeAsyncio
-pinecone-client>=6,<8
+pinecone[asyncio]>=7,<8
 
 # LangChain stack (stay on 0.3.x line)
 langchain~=0.3

@@ -102,18 +102,18 @@ dependencies:
   - pip:
       - openai==1.106.1
       - langchain==0.3.27
-      - langchain-community==0.3.29
-      - langchain-core==0.3.75
+      - langchain-community==0.3.31
+      - langchain-core==0.3.79
       - langchain-huggingface==0.3.1
-      - langchain-openai==0.3.32
+      - langchain-openai==0.3.35
       - langchain-pinecone==0.2.12
       - langchain-text-splitters==0.3.11
-      - langsmith==0.4.25
+      - langsmith==0.4.38
       - transformers==4.49.0
       - tokenizers==0.21.1
       - tiktoken==0.11.0
       - sentence-transformers==5.1.0
-      - pinecone-client>=6,<8
+      - "pinecone[asyncio]>=7,<8"
       - pinecone-plugin-assistant==1.8.0
       - pinecone-plugin-interface==0.0.7
       - safetensors==0.5.3
