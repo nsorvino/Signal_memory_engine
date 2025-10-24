@@ -10,24 +10,23 @@ dependencies:
   - pandas
   - scipy
   - scikit-learn
-  - pytorch=2.2.2
-  - uvicorn=0.35.0
-  - uvicorn-standard=0.35.0
-  - fastapi=0.116.2
+  - uvicorn
+  - uvicorn-standard
+  - fastapi
   - starlette
-  - httpx=0.28.1
+  - httpx
   - anyio
   - h11
-  - httpcore=1.0.9
-  - aiohttp=3.12.15
-  - aiosignal=1.4.0
+  - httpcore
+  - aiohttp
+  - aiosignal
   - yarl
   - attrs
   - charset-normalizer
   - idna
-  - urllib3=2.5.0
+  - urllib3
   - certifi
-  - click=8.3.0
+  - click
   - colorama
   - jinja2
   - markupsafe
@@ -36,14 +35,14 @@ dependencies:
   - tzdata
   - pyarrow
   - pillow
-  - requests=2.32.5
+  - requests
   - filelock
   - fsspec
   - cachetools
   - greenlet
   - networkx
   - sympy
-  - sqlalchemy=2.0.44
+  - sqlalchemy
   - orjson
   - regex
   - jsonschema
@@ -59,30 +58,30 @@ dependencies:
   - pygments
   - tornado
   - typing_extensions
-  - protobuf>=4.25,<5.29
+  - protobuf
   - gitdb
   - gitpython
   - smmap
   - pydeck
-  - mlflow=3.5.1
+  - mlflow
   - setuptools
   - wheel
   - tqdm
 
   # Web server / IO extras
-  - gunicorn=23.0.0
+  - gunicorn
   - uvloop
   - httptools
-  - websockets=15.0.1
-  - websocket-client=1.8.0
-  - email-validator=2.3.0
+  - websockets
+  - websocket-client
+  - email-validator
   - python-multipart
-  - flask=3.1.2
-  - werkzeug=3.1.3
-  - docker-py=7.1.0
+  - flask
+  - werkzeug
+  - docker-py
 
   # Visualization / plotting stack
-  - matplotlib=3.10.6
+  - matplotlib
   - contourpy
   - kiwisolver
   - fonttools
@@ -94,9 +93,9 @@ dependencies:
   - paramiko
 
   # GraphQL items
-  - graphene=3.4.3
-  - graphql-core=3.2.6
-  - graphql-relay=3.2.0
+  - graphene
+  - graphql-core
+  - graphql-relay
 
   # Let pip handle all Python-specific packages to avoid conflicts
   - pip:
