@@ -3,8 +3,9 @@ FROM mambaorg/micromamba:1.5.10-jammy
 ENV MAMBA_DOCKERFILE_ACTIVATE=1
 WORKDIR /app
 
-# Create the conda env
+# Create the conda env (includes pip packages from requirements-lock.txt)
 COPY environment.yml /tmp/environment.yml
+COPY requirements-lock.txt /tmp/requirements-lock.txt
 RUN micromamba create -y -f /tmp/environment.yml && micromamba clean -a -y
 
 ARG ENV_NAME=sme310
@@ -12,12 +13,6 @@ ENV CONDA_DEFAULT_ENV=${ENV_NAME}
 ENV PATH=/opt/conda/envs/${ENV_NAME}/bin:$PATH
 # added this so importable everywhere
 ENV PYTHONPATH=/app
-
-# Lock-based install
-COPY requirements-lock.txt ./
-
-RUN micromamba run -n ${ENV_NAME} python -m pip install --upgrade pip && \
-    micromamba run -n ${ENV_NAME} pip install --no-cache-dir -r requirements-lock.txt
 
 # Ensure files are owned by the runtime user
 USER root
