@@ -1,11 +1,12 @@
 # vector_store/pinecone_vectorstore.py
 
-from typing import List, Optional, Dict, Any
-from pinecone import Pinecone
-from langchain_core.embeddings import Embeddings
+from typing import Any
+
 from langchain_core.documents import Document
-from langchain_core.vectorstores import VectorStore
+from langchain_core.embeddings import Embeddings
 from langchain_core.retrievers import BaseRetriever
+from langchain_core.vectorstores import VectorStore
+from pinecone import Pinecone
 
 
 class PineconeVectorStore(VectorStore):
@@ -27,8 +28,8 @@ class PineconeVectorStore(VectorStore):
         index_name: str,
         embedding: Embeddings,
         text_key: str = "content",
-        api_key: Optional[str] = None,
-        environment: Optional[str] = None,
+        api_key: str | None = None,
+        environment: str | None = None,
     ) -> "PineconeVectorStore":
         """Create a PineconeVectorStore from an existing index."""
         # Use environment variables if not provided
@@ -52,9 +53,9 @@ class PineconeVectorStore(VectorStore):
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Perform similarity search."""
         # Get query embedding
         query_embedding = self.embedding.embed_query(query)
@@ -78,10 +79,10 @@ class PineconeVectorStore(VectorStore):
     
     def add_texts(
         self,
-        texts: List[str],
-        metadatas: Optional[List[Dict[str, Any]]] = None,
+        texts: list[str],
+        metadatas: list[dict[str, Any]] | None = None,
         **kwargs: Any,
-    ) -> List[str]:
+    ) -> list[str]:
         """Add texts to the vector store."""
         # Get embeddings
         embeddings = self.embedding.embed_documents(texts)
@@ -116,11 +117,11 @@ class PineconeRetriever(BaseRetriever):
         self.vectorstore = vectorstore
         self.search_kwargs = kwargs.get("search_kwargs", {"k": 4})
     
-    def _get_relevant_documents(self, query: str) -> List[Document]:
+    def _get_relevant_documents(self, query: str) -> list[Document]:
         """Get relevant documents for a query."""
         k = self.search_kwargs.get("k", 4)
         return self.vectorstore.similarity_search(query, k=k)
     
-    def get_relevant_documents(self, query: str) -> List[Document]:
+    def get_relevant_documents(self, query: str) -> list[Document]:
         """Get relevant documents for a query."""
         return self._get_relevant_documents(query)
