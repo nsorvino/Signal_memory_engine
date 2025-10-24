@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 import logging
-
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_community.vectorstores import Pinecone as LC_Pinecone
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_pinecone import PineconeVectorStore as LC_Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
-
 
 def flag_from_score(score: float) -> str:
     if score > 0.8:
@@ -20,17 +18,15 @@ def flag_from_score(score: float) -> str:
     else:
         return "stable"
 
-
 SUGGESTIONS = {
     "stable": "No action needed.",
     "drifting": "Consider sending a check-in message.",
     "concern": "Recommend escalation or a one-on-one conversation.",
 }
 
-
 def build_qa_chain(
-    pinecone_api_key: str,  # kept for parity; not used by LC vectorstore
-    pinecone_env: str,  # kept for parity; not used here
+    pinecone_api_key: str,   # kept for parity; not used by LC vectorstore
+    pinecone_env: str,       # kept for parity; not used here
     index_name: str,
     openai_api_key: str,
     embed_model: str = "sentence-transformers/all-MiniLM-L6-v2",
@@ -57,18 +53,14 @@ def build_qa_chain(
         max_tokens=256,
     )
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "Use the given context to answer the question. "
-                "If you don't know the answer, say you don't know. "
-                "Use three sentences maximum and keep the answer concise. "
-                "Context: {context}",
-            ),
-            ("human", "{input}"),
-        ]
-    )
+    prompt = ChatPromptTemplate.from_messages([
+        ("system",
+         "Use the given context to answer the question. "
+         "If you don't know the answer, say you don't know. "
+         "Use three sentences maximum and keep the answer concise. "
+         "Context: {context}"),
+        ("human", "{input}"),
+    ])
 
     question_answer_chain = create_stuff_documents_chain(llm, prompt)
     qa_chain = create_retrieval_chain(retriever, question_answer_chain)
