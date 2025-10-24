@@ -104,6 +104,36 @@ class PineconeVectorStore(VectorStore):
         
         return [f"doc_{i}" for i in range(len(texts))]
     
+    @classmethod
+    def from_texts(
+        cls,
+        texts: list[str],
+        embedding: Embeddings,
+        metadatas: list[dict[str, Any]] | None = None,
+        text_key: str = "content",
+        api_key: str | None = None,
+        environment: str | None = None,
+        index_name: str | None = None,
+        **kwargs: Any,
+    ) -> "PineconeVectorStore":
+        """Create a PineconeVectorStore from a list of texts."""
+        if not index_name:
+            raise ValueError("index_name is required for from_texts")
+        
+        # Create the vector store
+        vectorstore = cls.from_existing_index(
+            index_name=index_name,
+            embedding=embedding,
+            text_key=text_key,
+            api_key=api_key,
+            environment=environment,
+        )
+        
+        # Add the texts
+        vectorstore.add_texts(texts, metadatas=metadatas, **kwargs)
+        
+        return vectorstore
+
     def as_retriever(self, **kwargs: Any) -> BaseRetriever:
         """Return a retriever for this vector store."""
         return PineconeRetriever(vectorstore=self, **kwargs)
@@ -114,14 +144,10 @@ class PineconeRetriever(BaseRetriever):
     
     def __init__(self, vectorstore: PineconeVectorStore, **kwargs: Any):
         super().__init__()
-        self.vectorstore = vectorstore
-        self.search_kwargs = kwargs.get("search_kwargs", {"k": 4})
+        self._vectorstore = vectorstore
+        self._search_kwargs = kwargs.get("search_kwargs", {"k": 4})
     
     def _get_relevant_documents(self, query: str) -> list[Document]:
         """Get relevant documents for a query."""
-        k = self.search_kwargs.get("k", 4)
-        return self.vectorstore.similarity_search(query, k=k)
-    
-    def get_relevant_documents(self, query: str) -> list[Document]:
-        """Get relevant documents for a query."""
-        return self._get_relevant_documents(query)
+        k = self._search_kwargs.get("k", 4)
+        return self._vectorstore.similarity_search(query, k=k)
