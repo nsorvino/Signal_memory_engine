@@ -3,6 +3,7 @@
 # by the following command:
 #
 #    pip-compile --cert=None --client-cert=None --index-url=None --output-file=requirements-lock.txt --pip-args=None requirements.in
+#    pip-compile --cert=None --client-cert=None --index-url=None --output-file=requirements-lock.txt --pip-args=None requirements.in
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
@@ -57,6 +58,7 @@ click==8.3.0
     #   black
     #   mlflow-skinny
     #   pip-tools
+    #   pip-tools
     #   streamlit
     #   uvicorn
 cloudpickle==3.1.1
@@ -65,6 +67,8 @@ databricks-sdk==0.70.0
     # via mlflow-skinny
 dataclasses-json==0.6.7
     # via langchain-community
+distlib==0.4.0
+    # via virtualenv
 distlib==0.4.0
     # via virtualenv
 distro==1.9.0
@@ -192,6 +196,8 @@ multidict==6.7.0
     # via
     #   aiohttp
     #   yarl
+mypy==1.18.2
+    # via -r requirements.in
 mypy==1.18.2
     # via -r requirements.in
 mypy-extensions==1.1.0
@@ -341,6 +347,7 @@ pyyaml==6.0.3
     #   langchain-community
     #   langchain-core
     #   mlflow-skinny
+    #   pre-commit
     #   pre-commit
     #   transformers
 referencing==0.37.0
