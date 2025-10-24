@@ -18,6 +18,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: Prevent Pinecone 7.x conflicts
+        run: |
+          pip uninstall -y pinecone || true
+          pip uninstall -y "pinecone[asyncio]" || true
       - name: Install deps (pip)
         run: |
           cd signal_memory_engine_v1

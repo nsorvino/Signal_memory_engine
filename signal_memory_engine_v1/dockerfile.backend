@@ -15,6 +15,11 @@ ENV PYTHONPATH=/app
 
 # Lock-based install
 COPY requirements-lock.txt ./
+
+# Prevent Pinecone 7.x meta from shadowing pinecone-client
+RUN micromamba run -n ${ENV_NAME} python -m pip uninstall -y pinecone || true && \
+    micromamba run -n ${ENV_NAME} python -m pip uninstall -y "pinecone[asyncio]" || true
+
 RUN micromamba run -n ${ENV_NAME} python -m pip install --upgrade pip && \
     micromamba run -n ${ENV_NAME} pip install --no-cache-dir -r requirements-lock.txt
 
