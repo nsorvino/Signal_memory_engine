@@ -381,24 +381,32 @@ Accepts the same body as `/query` but returns only the derived trust score and f
 From `signal_memory_engine_v1/`:
 
 ```bash
-# run unit tests (quiet)
+# Development
+make dev             # -> uvicorn api.main:app --reload (with live reload for api/, agents/, coherence/, utils/, storage/, scripts/)
+
+# Testing & Quality
 make test            # -> pytest -q
-
-# type-check
 make type            # -> mypy .
+make lint            # -> ruff check . && black --check . (lint-only, fails on issues)
+make black-check     # -> black --check . (check formatting without changing files)
 
-# lint
-make lint            # -> ruff check .
+# Formatting
+make black           # -> black . (format with Black only)
+make format          # -> ruff check --fix . && black . (auto-fix: Ruff first, then Black)
 
-# format (if you added a target)
-make black           # -> black .
-
-# run API with live reload
-make dev
-
-# build & run with Docker Compose
-make build
+# Docker
+make build           # -> docker compose up --build
 ```
+
+**Command Details:**
+- `make dev` - Runs the API server with live reload for all source directories
+- `make test` - Runs pytest in quiet mode
+- `make type` - Runs mypy type checking
+- `make lint` - Runs both ruff and black checks (fails if issues found)
+- `make black-check` - Checks Black formatting without modifying files
+- `make black` - Formats code with Black only
+- `make format` - Auto-fixes code: runs ruff with --fix, then formats with Black
+- `make build` - Builds and runs the full Docker Compose stack
 
 ### Pre-commit hooks:
 ```bash
