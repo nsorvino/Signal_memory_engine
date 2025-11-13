@@ -1,6 +1,7 @@
 # vector_store/pinecone_vectorstore.py
 
-from typing import Any, Iterable, Tuple
+from collections.abc import Iterable
+from typing import Any
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -67,7 +68,7 @@ class PineconeVectorStore(VectorStore):
         k: int = 4,
         filter: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> list[Tuple[Document, float]]:
+    ) -> list[tuple[Document, float]]:
         """Perform similarity search and return (Document, score) pairs."""
         return list(self._similarity_search_with_scores(query, k=k, filter=filter))
 
@@ -139,7 +140,7 @@ class PineconeVectorStore(VectorStore):
     # ------------------------------------------------------------------ #
     def _similarity_search_with_scores(
         self, query: str, k: int = 4, filter: dict[str, Any] | None = None
-    ) -> Iterable[Tuple[Document, float]]:
+    ) -> Iterable[tuple[Document, float]]:
         """Internal helper that yields (Document, score) tuples."""
         query_embedding = self.embedding.embed_query(query)
         results = self.index.query(
