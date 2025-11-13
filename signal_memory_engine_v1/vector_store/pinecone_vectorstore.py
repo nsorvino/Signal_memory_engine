@@ -1,6 +1,6 @@
 # vector_store/pinecone_vectorstore.py
 
-from typing import Any
+from typing import Any, Iterable, Tuple
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -59,25 +59,17 @@ class PineconeVectorStore(VectorStore):
         **kwargs: Any,
     ) -> list[Document]:
         """Perform similarity search."""
-        # Get query embedding
-        query_embedding = self.embedding.embed_query(query)
+        return [doc for doc, _ in self._similarity_search_with_scores(query, k=k, filter=filter)]
 
-        # Search in Pinecone
-        results = self.index.query(
-            vector=query_embedding,
-            top_k=k,
-            filter=filter,
-            include_metadata=True,
-        )
-
-        # Convert to Document objects
-        documents = []
-        for match in results.matches:
-            metadata = match.metadata or {}
-            content = metadata.get(self.text_key, "")
-            documents.append(Document(page_content=content, metadata=metadata))
-
-        return documents
+    def similarity_search_with_score(
+        self,
+        query: str,
+        k: int = 4,
+        filter: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> list[Tuple[Document, float]]:
+        """Perform similarity search and return (Document, score) pairs."""
+        return list(self._similarity_search_with_scores(query, k=k, filter=filter))
 
     def add_texts(
         self,
@@ -141,6 +133,27 @@ class PineconeVectorStore(VectorStore):
     def as_retriever(self, **kwargs: Any) -> BaseRetriever:
         """Return a retriever for this vector store."""
         return PineconeRetriever(vectorstore=self, **kwargs)
+
+    # ------------------------------------------------------------------ #
+    # Internal helpers
+    # ------------------------------------------------------------------ #
+    def _similarity_search_with_scores(
+        self, query: str, k: int = 4, filter: dict[str, Any] | None = None
+    ) -> Iterable[Tuple[Document, float]]:
+        """Internal helper that yields (Document, score) tuples."""
+        query_embedding = self.embedding.embed_query(query)
+        results = self.index.query(
+            vector=query_embedding,
+            top_k=k,
+            filter=filter,
+            include_metadata=True,
+        )
+
+        for match in getattr(results, "matches", []):
+            metadata = match.metadata or {}
+            content = metadata.get(self.text_key, "")
+            score = getattr(match, "score", 0.0)
+            yield Document(page_content=content, metadata=metadata), float(score)
 
 
 class PineconeRetriever(BaseRetriever):

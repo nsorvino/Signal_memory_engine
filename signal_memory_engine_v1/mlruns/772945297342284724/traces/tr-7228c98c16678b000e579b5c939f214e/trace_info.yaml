@@ -1,0 +1,18 @@
+execution_duration_ms: 2788
+request_preview: '{"input": "Current biometric readings:\n• HRV: 56.8 ms\n• Temp:
+  37.4 °C\n• Blink rate: 10.2 bpm\n\nUse this context to answer the question below.\n\nQuestion:
+  What is emotional recursion?\n"}'
+request_time: '2025-11-13T02:34:53.307Z'
+response_preview: '{"input": "Current biometric readings:\n• HRV: 56.8 ms\n• Temp:
+  37.4 °C\n• Blink rate: 10.2 bpm\n\nUse this context to answer the question below.\n\nQuestion:
+  What is emotional recursion?\n", "context": [], "answer": "Emotional recursion refers
+  to the process by which emotions can influence thoughts and behaviors, creating
+  a feedback loop. For example, feeling anxious can lead to negative thoughts, which
+  in turn can amplify the anxiety. This concept highlights the interconnectedness
+  of emotional states and cognitive processes."}'
+state: OK
+trace_id: tr-7228c98c16678b000e579b5c939f214e
+trace_location:
+  mlflow_experiment:
+    experiment_id: '772945297342284724'
+  type: MLFLOW_EXPERIMENT

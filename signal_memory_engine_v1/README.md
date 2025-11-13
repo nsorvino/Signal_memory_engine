@@ -26,11 +26,11 @@ A conversational Retrieval-Augmented Generation (RAG) microservice powered by Fa
 
 ## 📘 Documentation
 
-* **Flow PDFs**
-  * [Query Endpoint Flow (PDF)](./docs/query_endpoint_flow.pdf)
+* **Flow PDF**
   * [Ingestion, Coherence, and Storage Flow (PDF)](./docs/ingestion_coherence_storage_flow.pdf)
 * **Architecture**
   * `docs/adr/ADR-0001-v2-backbone.md` — v2 backbone decisions (deps centralization, Pinecone stub, multi-index strategy, logging, CI).
+  * `docs/adr/ADR-0002-pinecone-vectorstore-scores.md` — Pinecone vector store returns scored matches to satisfy LangChain retrieval contract.
 
 ---
 

@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/nathanielsorvino/Desktop/sme_post_review/Signal_memory_engine/signal_memory_engine_v1/mlruns/772945297342284724/87af4a14c85d4ffb8186c64766272e30/artifacts
+end_time: 1763000892902
+entry_point_name: ''
+experiment_id: '772945297342284724'
+lifecycle_stage: active
+run_id: 87af4a14c85d4ffb8186c64766272e30
+run_name: single-29fefea0ac3641079c63575d86a8fc2e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1763000889064
+status: 4
+tags: []
+user_id: nathanielsorvino

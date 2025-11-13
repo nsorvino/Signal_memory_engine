@@ -1,0 +1,12 @@
+execution_duration_ms: 33
+request_preview: '{"query": "Current biometric readings:\n• HRV: 71.6 ms\n• Temp:
+  36.1 °C\n• Blink rate: 15.3 bpm\n\nUse this context to answer the question below.\n\nQuestion:
+  What is emotional recursion?\n"}'
+request_time: '2025-11-13T02:28:09.314Z'
+response_preview: ''
+state: ERROR
+trace_id: tr-ef9d5d43fdec3a8c5533bca44970ef00
+trace_location:
+  mlflow_experiment:
+    experiment_id: '772945297342284724'
+  type: MLFLOW_EXPERIMENT
